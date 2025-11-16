@@ -1,50 +1,52 @@
 /**
- * Configuración dinámica de API
- * Detecta automáticamente el protocolo y host correcto
+ * Configuración dinámica de API con soporte para Cloudflare y desarrollo local
+ * Usa variables de entorno y proxy de Vite para evitar problemas de CORS
  */
-
-// Variable para mostrar advertencia solo una vez
-let mixedContentWarningShown = false
 
 /**
- * Obtener la URL base del API de forma inteligente
- * - Si frontend y backend están en el mismo dominio, usar rutas relativas
- * - Si están separados, usar URL completa
+ * Obtener la URL base del API
+ * - En desarrollo local: usa proxy de Vite (/api)
+ * - En Cloudflare/producción: usa variable de entorno o URL completa
  */
 export const getApiBaseUrl = () => {
-  // Obtener URL del .env si existe
+  // 1. Prioridad: Variable de entorno explícita
   const envUrl = import.meta.env.VITE_API_BASE_URL
   
-  // Si estamos en producción (mismo dominio que el backend), usar ruta vacía
-  // Esto permite que las peticiones vayan al mismo servidor
-  if (import.meta.env.PROD) {
-    // En producción, el backend sirve el frontend
-    // Usar el mismo protocolo y host
-    return ''  // Rutas relativas: /health, /predict, etc.
+  if (envUrl) {
+    console.log('🔧 API URL desde .env:', envUrl)
+    return envUrl
   }
   
-  // En desarrollo, verificar si estamos usando Vite dev server
+  // 2. En desarrollo local: usar proxy de Vite
   if (import.meta.env.DEV) {
-    // Si estamos en localhost, usar localhost
+    // Si estamos en localhost, usar el proxy /api
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return envUrl || 'http://localhost:8000'
+      console.log('🔧 Modo desarrollo local: usando proxy /api')
+      return '' // Usar rutas relativas que Vite redirigirá al backend
     }
     
-    // Si estamos en HTTPS (Cloudflare) en desarrollo
-    if (window.location.protocol === 'https:') {
-      if (!mixedContentWarningShown) {
-        console.warn('⚠️ MIXED CONTENT: Usa el backend unificado')
-        console.warn('💡 Solución: Accede desde http://localhost:8000 (backend sirve todo)')
-        mixedContentWarningShown = true
-      }
-      
-      // Usar el mismo protocolo y host
-      return `${window.location.protocol}//${window.location.hostname}:8000`
+    // Si estamos en una IP local (192.168.x.x), también usar proxy
+    if (window.location.hostname.startsWith('192.168.') || window.location.hostname.startsWith('10.')) {
+      console.log('🔧 Modo desarrollo red local: usando proxy /api')
+      return ''
+    }
+    
+    // Si estamos en Cloudflare en desarrollo
+    if (window.location.hostname.includes('trycloudflare.com')) {
+      console.log('🔧 Modo Cloudflare desarrollo: usando URL del entorno')
+      return envUrl || window.location.origin
     }
   }
   
-  // Fallback: usar la URL del .env
-  return envUrl || 'http://localhost:8000'
+  // 3. En producción: usar URL del entorno o mismo origen
+  if (import.meta.env.PROD) {
+    console.log('🔧 Modo producción: usando mismo origen')
+    return '' // Rutas relativas al mismo servidor
+  }
+  
+  // 4. Fallback: localhost
+  console.warn('⚠️ Usando fallback: http://localhost:5000')
+  return 'http://localhost:5000'
 }
 
 /**

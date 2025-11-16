@@ -24,9 +24,8 @@ export const ThemeProvider = ({ children }) => {
     return 'light'
   })
 
-  // Use refs for transient state to prevent unnecessary re-renders
+  // Use ref for transient state to prevent unnecessary re-renders
   const isTransitioningRef = useRef(false)
-  const debounceTimeoutRef = useRef(null)
 
   // Async localStorage persistence to avoid blocking UI thread
   const persistTheme = useCallback((newTheme) => {
@@ -39,34 +38,25 @@ export const ThemeProvider = ({ children }) => {
     })
   }, [])
 
-  // Optimized DOM update with batched operations
+  // Optimized DOM update - instant change
   const applyTheme = useCallback((newTheme) => {
     const root = document.documentElement
     
-    // Step 1: Disable transitions for instant change
-    root.classList.add('theme-switching')
+    // Apply theme immediately without waiting for animation frame
+    root.setAttribute('data-theme', newTheme)
     
-    // Step 2: Apply theme in next frame (batched)
+    // Update meta theme-color for mobile browsers
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute(
+        'content',
+        newTheme === 'dark' ? '#0c1220' : '#f1f5f9'
+      )
+    }
+    
+    // Reset transition lock after a short delay
     requestAnimationFrame(() => {
-      root.setAttribute('data-theme', newTheme)
-      
-      // Update meta theme-color for mobile browsers
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
-      if (metaThemeColor) {
-        metaThemeColor.setAttribute(
-          'content',
-          newTheme === 'dark' ? '#0c1220' : '#f1f5f9'
-        )
-      }
-      
-      // Step 3: Force reflow to apply changes immediately
-      root.offsetHeight
-      
-      // Step 4: Re-enable transitions in next frame
-      requestAnimationFrame(() => {
-        root.classList.remove('theme-switching')
-        isTransitioningRef.current = false
-      })
+      isTransitioningRef.current = false
     })
     
     // Persist theme asynchronously
@@ -94,30 +84,15 @@ export const ThemeProvider = ({ children }) => {
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current)
-      }
-    }
-  }, [])
 
-  // Debounced toggle with transition lock
+
+  // Immediate toggle without debounce for instant response
   const toggleTheme = useCallback(() => {
     // Prevent clicks during transition
     if (isTransitioningRef.current) return
     
-    // Clear any pending toggle
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current)
-    }
-    
-    // Debounce the actual toggle (100ms)
-    debounceTimeoutRef.current = setTimeout(() => {
-      isTransitioningRef.current = true
-      setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
-    }, 100)
+    isTransitioningRef.current = true
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
   }, [])
 
   const setLightTheme = useCallback(() => {

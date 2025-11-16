@@ -285,7 +285,10 @@ class AuthService {
   // Verificar estado de conexión con el servidor
   async checkServerConnection() {
     try {
-      const response = await fetch(`${this.baseUrl}/health`, {
+      // Construir URL: si baseUrl está vacío, usar ruta relativa (proxy de Vite)
+      const url = this.baseUrl ? `${this.baseUrl}/health` : '/health'
+      
+      const response = await fetch(url, {
         method: 'GET',
         signal: AbortSignal.timeout(5000) // 5 segundos timeout
       })

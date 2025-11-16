@@ -86,17 +86,8 @@ class AnalysisService {
         }
       }
 
-      // Crear FormData para enviar la imagen y datos del paciente
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      // Agregar datos del paciente (REQUERIDOS)
-      if (options.patientData) {
-        formData.append('age', options.patientData.age)
-        formData.append('sex', options.patientData.sex)
-        formData.append('lesion_location', options.patientData.lesionLocation)
-        console.log('Datos del paciente incluidos:', options.patientData)
-      } else {
+      // Validar datos del paciente (REQUERIDOS)
+      if (!options.patientData) {
         return {
           success: false,
           error: 'MISSING_METADATA',
@@ -104,18 +95,19 @@ class AnalysisService {
         }
       }
 
+      console.log('Datos del paciente:', options.patientData)
       console.log('Enviando imagen al servidor...')
       
-      // Adaptar FormData para el backend actual
+      // Crear FormData para el backend
       const backendFormData = new FormData()
       backendFormData.append('file', file)
       backendFormData.append('age', options.patientData.age)
       backendFormData.append('sex', options.patientData.sex)
-      // Mapear lesionLocation a anatom_site_general
       backendFormData.append('anatom_site_general', options.patientData.lesionLocation)
       
-      // Usar el endpoint correcto del backend
-      const url = `${this.baseUrl}/predict`
+      // Construir URL: si baseUrl está vacío, usar ruta relativa (proxy de Vite)
+      const url = this.baseUrl ? `${this.baseUrl}/predict` : '/predict'
+      console.log('URL de análisis:', url)
       
       const response = await this.makeRequest(url, {
         method: 'POST',
@@ -280,8 +272,10 @@ class AnalysisService {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-      // Usar el endpoint /health que sí existe en el backend
-      const response = await fetch(`${this.baseUrl}/health`, {
+      // Construir URL: si baseUrl está vacío, usar ruta relativa (proxy de Vite)
+      const url = this.baseUrl ? `${this.baseUrl}/health` : '/health'
+      
+      const response = await fetch(url, {
         method: 'GET',
         signal: controller.signal
       })
@@ -334,7 +328,10 @@ class AnalysisService {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 3000)
         
-        const response = await fetch(`${this.baseUrl}/health`, {
+        // Construir URL: si baseUrl está vacío, usar ruta relativa (proxy de Vite)
+        const url = this.baseUrl ? `${this.baseUrl}/health` : '/health'
+        
+        const response = await fetch(url, {
           method: 'GET',
           signal: controller.signal
         })

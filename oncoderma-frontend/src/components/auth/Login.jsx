@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useTheme } from '../../contexts/ThemeContext.jsx'
 import { validateRequired } from '../../utils/validators'
-import ThemeToggle from '../ui/ThemeToggle'
 import AdaptiveLogo from '../ui/AdaptiveLogo'
 
 const Login = () => {
@@ -28,28 +27,30 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, location])
 
-  const handleInputChange = (e) => {
+  // Optimizar handleInputChange con useCallback
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: value
     }))
     
-    // Limpiar error del campo cuando el usuario empiece a escribir
+    // Limpiar errores de forma optimizada
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
     }
     
-    // Limpiar error general
     if (generalError) {
       setGeneralError('')
     }
-  }
+  }, [errors, generalError])
 
-  const validateForm = () => {
+  // Validación optimizada y memoizada
+  const validateForm = useCallback(() => {
     const newErrors = {}
 
     // Validar usuario
@@ -66,34 +67,53 @@ const Login = () => {
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
+  }, [formData.username, formData.password])
 
-  const handleSubmit = async (e) => {
+  // Handler optimizado con feedback inmediato
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault()
     
-    if (!validateForm()) {
-      return
-    }
-
+    // ✅ FEEDBACK INMEDIATO: Cambiar estado ANTES de cualquier validación
     setLoading(true)
     setGeneralError('')
 
-    try {
-      const result = await login(formData.username, formData.password)
-      
-      if (result.success) {
-        // Redirigir a la página desde donde vino o al home
-        const from = location.state?.from?.pathname || '/'
-        navigate(from, { replace: true })
-      } else {
-        setGeneralError(result.message || 'Error de autenticación')
+    // ✅ Usar requestIdleCallback o setTimeout para no bloquear UI
+    // requestAnimationFrame es para animaciones, usamos setTimeout(0) para tareas async
+    setTimeout(async () => {
+      try {
+        // Validación rápida
+        const isValid = validateForm()
+        
+        if (!isValid) {
+          setLoading(false)
+          return
+        }
+
+        // Login asíncrono
+        const result = await login(formData.username, formData.password)
+        
+        if (result.success) {
+          // Navegación diferida para no bloquear
+          const from = location.state?.from?.pathname || '/'
+          requestAnimationFrame(() => {
+            navigate(from, { replace: true })
+          })
+        } else {
+          setGeneralError(result.message || 'Error de autenticación')
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Login error:', error)
+        setGeneralError('Error de conexión. Inténtalo de nuevo.')
+        setLoading(false)
       }
-    } catch (error) {
-      setGeneralError('Error de conexión. Inténtalo de nuevo.')
-    } finally {
-      setLoading(false)
-    }
-  }
+    }, 0)
+  }, [formData, validateForm, login, location, navigate])
+
+  // Memoizar si el formulario es válido para deshabilitar botón
+  const isFormValid = useMemo(() => {
+    return formData.username.trim() !== '' && formData.password.trim() !== ''
+  }, [formData.username, formData.password])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -222,12 +242,12 @@ const Login = () => {
 
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Campo Usuario */}
-                <div className="space-y-1.5">
-                  <label htmlFor="username" className="block text-sm font-medium text-primary dark:text-gray-200">
+                <div className="space-y-2">
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                     Usuario
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                       <svg 
                         className="h-5 w-5 text-gray-400 dark:text-gray-500" 
                         fill="none" 
@@ -243,18 +263,18 @@ const Login = () => {
                       name="username"
                       value={formData.username}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 text-base rounded-lg border-2 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                      className={`w-full pl-12 pr-4 py-3.5 text-base rounded-xl border-2 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 ${
                         errors.username 
-                          ? 'border-red-500 focus:border-red-600 focus:ring-red-600/20' 
-                          : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20'
-                      } focus:outline-none focus:ring-2`}
+                          ? 'border-red-500 focus:border-red-600 focus:ring-4 focus:ring-red-600/10' 
+                          : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                      } focus:outline-none`}
                       placeholder="Ingresa tu usuario"
                       disabled={loading}
                     />
                   </div>
                   {errors.username && (
-                    <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 flex items-center mt-1">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 flex items-center mt-1.5">
+                      <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       {errors.username}
@@ -263,12 +283,12 @@ const Login = () => {
                 </div>
 
                 {/* Campo Contraseña */}
-                <div className="space-y-1.5">
-                  <label htmlFor="password" className="block text-sm font-medium text-primary dark:text-gray-200">
+                <div className="space-y-2">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                     Contraseña
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                       <svg 
                         className="h-5 w-5 text-gray-400 dark:text-gray-500" 
                         fill="none" 
@@ -284,18 +304,18 @@ const Login = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 text-base rounded-lg border-2 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                      className={`w-full pl-12 pr-4 py-3.5 text-base rounded-xl border-2 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 ${
                         errors.password 
-                          ? 'border-red-500 focus:border-red-600 focus:ring-red-600/20' 
-                          : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20'
-                      } focus:outline-none focus:ring-2`}
+                          ? 'border-red-500 focus:border-red-600 focus:ring-4 focus:ring-red-600/10' 
+                          : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                      } focus:outline-none`}
                       placeholder="Ingresa tu contraseña"
                       disabled={loading}
                     />
                   </div>
                   {errors.password && (
-                    <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 flex items-center mt-1">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 flex items-center mt-1.5">
+                      <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       {errors.password}
@@ -319,8 +339,8 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full bg-gradient-to-r from-accent to-secondary hover:from-accent/90 hover:to-secondary/90 text-white font-semibold py-3 sm:py-3.5 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg min-h-[48px] ${
-                    loading ? 'opacity-50 cursor-not-allowed transform-none' : ''
+                  className={`btn-submit-optimized w-full bg-gradient-to-r from-accent to-secondary text-white font-semibold py-3 sm:py-3.5 px-6 rounded-lg min-h-[48px] ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {loading ? (

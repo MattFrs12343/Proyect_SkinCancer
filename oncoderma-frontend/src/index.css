@@ -2,20 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme Switching Optimization - Disable transitions during theme change */
-.theme-switching,
-.theme-switching * {
-  transition: none !important;
-  animation: none !important;
-}
-
-/* Performance Hints for Theme-Dependent Properties */
+/* Theme Switching Optimization - Ultra fast transitions */
 :root {
-  will-change: background-color;
+  /* Use GPU-accelerated properties only */
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 body {
-  will-change: background-color, color;
+  /* Fast transitions for theme changes */
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Optimize theme-dependent elements */
+.card,
+.metric-card,
+.input-field,
+.btn-primary,
+.btn-secondary {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 /* Enhanced Design System - Medical Dashboard Style */
@@ -147,13 +151,15 @@ body {
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    /* Fast theme transitions */
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
   
   body {
     background-color: var(--background);
     color: var(--primary);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    /* Fast theme transitions */
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 }
 
@@ -3531,3 +3537,346 @@ body {
 /* ========================================
    FIN DE MEJORAS ADICIONALES PARA MÓVILES
    ======================================== */
+
+
+/* ========================================
+   LOGIN FORM - MOBILE ONLY FIXES
+   Solo para pantallas móviles (max-width: 768px)
+   NO afecta el diseño de escritorio
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Aumentar padding-left del input para evitar superposición con el icono */
+  input[type="text"]#username,
+  input[type="password"]#password {
+    padding-left: 3.5rem !important; /* 56px - más espacio en móviles */
+    font-size: 16px !important; /* Evita zoom automático en iOS */
+  }
+  
+  /* Asegurar posicionamiento correcto del icono en móviles */
+  #username ~ div.absolute,
+  #password ~ div.absolute {
+    left: 0.875rem !important; /* 14px - centrar mejor el icono */
+  }
+}
+
+/* Para móviles muy pequeños (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  input[type="text"]#username,
+  input[type="password"]#password {
+    padding-left: 3.25rem !important; /* 52px */
+    padding-right: 0.875rem !important; /* 14px */
+    font-size: 15px !important;
+  }
+  
+  #username ~ div.absolute,
+  #password ~ div.absolute {
+    left: 0.75rem !important; /* 12px */
+  }
+}
+
+
+/* ========================================
+   HOME PAGE - MOBILE ICON CENTERING FIX
+   Solo para pantallas móviles (max-width: 768px)
+   Centra los íconos dentro de las figuras circulares
+   NO afecta el diseño de escritorio
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Centrar íconos dentro de círculos/figuras en la página de inicio */
+  
+  /* Feature Icons - Círculos con íconos (w-16 h-16, w-12 h-12, w-10 h-10, w-8 h-8) */
+  .w-16.h-16.rounded-full,
+  .w-12.h-12.rounded-full,
+  .w-10.h-10.rounded-full,
+  .w-8.h-8.rounded-full {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Asegurar que los SVG dentro de los círculos estén centrados */
+  .w-16.h-16.rounded-full svg,
+  .w-12.h-12.rounded-full svg,
+  .w-10.h-10.rounded-full svg,
+  .w-8.h-8.rounded-full svg {
+    margin: auto !important;
+  }
+  
+  /* Centrar contenedores de íconos con gradientes */
+  .bg-gradient-to-r.rounded-full,
+  .bg-gradient-to-br.rounded-full {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Centrar íconos en tarjetas con fondos de color */
+  .bg-green-100.rounded-full,
+  .bg-blue-100.rounded-full,
+  .bg-purple-100.rounded-full,
+  .bg-cyan-500.rounded-full,
+  .bg-teal-500.rounded-full,
+  .bg-green-500.rounded-full,
+  .bg-blue-500.rounded-full,
+  .bg-purple-500.rounded-full,
+  .bg-orange-500.rounded-full {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Centrar íconos en contenedores con padding */
+  .bg-accent\\/10.rounded-full,
+  .bg-secondary\\/10.rounded-full {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Asegurar que los emojis en círculos también estén centrados */
+  .w-20.h-20.rounded-2xl {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+
+/* ========================================
+   ANALIZAR PAGE - MOBILE NUMBER CENTERING FIX
+   Solo para pantallas móviles (max-width: 768px)
+   Centra los números dentro de los círculos de ranking
+   NO afecta el diseño de escritorio
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Centrar números de ranking dentro de círculos en la página de análisis */
+  
+  /* Círculos con números de ranking (1, 2, 3) */
+  .text-2xl.font-bold:has(+ *),
+  span.text-2xl.font-bold {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  
+  /* Contenedores de números con gradientes o colores sólidos */
+  .bg-gradient-to-r.text-white.rounded-full.w-5.h-5,
+  .bg-gradient-to-r.text-white.rounded-full.w-6.h-6,
+  .bg-gradient-to-r.text-white.rounded-full.w-8.h-8,
+  .bg-cyan-500.text-white.rounded-full,
+  .bg-blue-500.text-white.rounded-full,
+  .bg-purple-500.text-white.rounded-full {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Asegurar que los números dentro de los círculos estén centrados */
+  .rounded-full.flex.items-center.justify-center span,
+  .rounded-full span.text-2xl,
+  .rounded-full span.font-bold {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+
+/* ========================================
+   MOBILE PERFORMANCE OPTIMIZATION
+   Optimizaciones específicas para móvil
+   Usa GPU acceleration y transiciones ligeras
+   ======================================== */
+
+/* Botones optimizados para móvil - Aceleración por GPU */
+.btn-submit-optimized {
+  /* Usar will-change para preparar la GPU */
+  will-change: transform, opacity;
+  /* Forzar aceleración por GPU */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+  /* Transiciones solo en propiedades que usa GPU */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover solo en desktop */
+@media (min-width: 769px) {
+  .btn-submit-optimized:hover:not(:disabled) {
+    transform: translateZ(0) scale(1.02);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    opacity: 0.95;
+  }
+}
+
+/* Optimizaciones específicas para móvil */
+@media (max-width: 768px) {
+  /* Botones: feedback táctil inmediato sin animaciones pesadas */
+  .btn-submit-optimized:active:not(:disabled) {
+    transform: translateZ(0) scale(0.98);
+    opacity: 0.9;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+  
+  /* Reducir duración de transiciones en móvil */
+  .btn-submit-optimized {
+    transition-duration: 0.15s;
+  }
+  
+  /* Optimizar animaciones de spinner en móvil */
+  .animate-spin {
+    animation-duration: 0.8s;
+  }
+  
+  /* Desactivar hover effects en móvil (touch devices) */
+  .hover\:scale-\[1\.02\]:hover {
+    transform: none !important;
+  }
+  
+  .hover\:shadow-lg:hover {
+    box-shadow: none !important;
+  }
+  
+  /* Optimizar transiciones de inputs en móvil */
+  input[type="text"],
+  input[type="password"] {
+    transition-duration: 0.15s !important;
+  }
+  
+  /* Reducir blur en elementos decorativos para mejor rendimiento */
+  .blur-3xl {
+    filter: blur(40px) !important;
+  }
+  
+  /* Optimizar backdrop-blur en móvil */
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+}
+
+/* Touch optimization - Eliminar delay de 300ms en móvil */
+@media (max-width: 768px) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Optimización de animaciones para dispositivos de bajo rendimiento */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* Usar animaciones más ligeras */
+  * {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.15s !important;
+  }
+  
+  /* Mantener animaciones críticas */
+  .animate-spin {
+    animation-duration: 0.8s !important;
+  }
+}
+
+/* Optimización para dispositivos con GPU limitada */
+@media (max-width: 768px) {
+  /* Limitar el número de elementos con will-change */
+  .card:hover,
+  .hover-lift:hover {
+    will-change: auto !important;
+  }
+  
+  /* Simplificar gradientes en móvil para mejor rendimiento */
+  .bg-gradient-to-r,
+  .bg-gradient-to-br,
+  .bg-gradient-to-tr {
+    background-attachment: scroll !important;
+  }
+}
+
+
+/* ========================================
+   THEME TOGGLE OPTIMIZATION
+   Cambio de tema instantáneo en móvil
+   ======================================== */
+
+/* ✅ Botón de tema con GPU acceleration */
+.theme-toggle-btn {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* ✅ Transiciones de tema usando SOLO CSS variables */
+/* Esto evita re-renders pesados en React */
+:root {
+  /* Transiciones suaves pero rápidas */
+  --theme-transition-duration: 0.2s;
+  --theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ✅ Aplicar transiciones SOLO a propiedades que usa GPU */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, transform;
+  transition-duration: var(--theme-transition-duration);
+  transition-timing-function: var(--theme-transition-timing);
+}
+
+/* ✅ OPTIMIZACIÓN MÓVIL: Transiciones más rápidas */
+@media (max-width: 768px) {
+  :root {
+    --theme-transition-duration: 0.15s;
+  }
+  
+  /* ✅ Feedback táctil inmediato en el botón */
+  .theme-toggle-btn:active {
+    transform: translateZ(0) scale(0.95);
+    transition-duration: 0.1s;
+  }
+  
+  /* ✅ Desactivar transiciones pesadas en móvil durante cambio de tema */
+  .theme-switching * {
+    transition-duration: 0.1s !important;
+  }
+}
+
+/* ✅ Optimización para dispositivos de bajo rendimiento */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* Mantener animaciones pero más ligeras */
+  * {
+    animation-duration: 0.15s !important;
+  }
+}
+
+/* ✅ Prevenir flash durante cambio de tema */
+html {
+  background-color: var(--background);
+  transition: background-color var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--primary);
+  transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+              color var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
+/* ✅ Optimizar cambio de tema en elementos específicos */
+.card,
+.btn-primary,
+.btn-secondary,
+.input-field {
+  transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+              border-color var(--theme-transition-duration) var(--theme-transition-timing),
+              color var(--theme-transition-duration) var(--theme-transition-timing);
+}

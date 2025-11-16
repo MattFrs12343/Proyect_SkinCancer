@@ -1,44 +1,80 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Suspense, lazy, useEffect } from 'react'
+import { Suspense, lazy } from 'react'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import ProtectedRoute from './components/auth/ProtectedRoute'
-import LoadingSpinner from './components/ui/LoadingSpinner'
-import ResourcePreloader from './components/common/ResourcePreloader'
-import MobileOptimizer from './components/common/MobileOptimizer'
 
-// Lazy loading de componentes para code splitting
+// ✅ OPTIMIZACIÓN CRÍTICA: Componentes mínimos cargados inicialmente
+// Solo LoadingSpinner se carga de inmediato (es pequeño y necesario)
+import LoadingSpinner from './components/ui/LoadingSpinner'
+
+// ✅ LAZY LOADING AGRESIVO: Todo se carga bajo demanda
+// Login se carga primero (ruta inicial)
 const Login = lazy(() => import('./components/auth/Login'))
+
+// Layout y páginas se cargan SOLO después del login exitoso
 const Layout = lazy(() => import('./components/layout/Layout'))
 const Home = lazy(() => import('./pages/Home'))
 const Analizar = lazy(() => import('./pages/Analizar'))
 const FAQ = lazy(() => import('./pages/FAQ'))
 const Contacto = lazy(() => import('./pages/Contacto'))
 
+// ✅ Componentes pesados se cargan SOLO cuando se necesitan
+// ResourcePreloader y MobileOptimizer NO se cargan en login
+// Se cargarán automáticamente cuando se importen en otras páginas
+
+// ✅ Componente de Loading optimizado para móvil
+const OptimizedLoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center">
+      <LoadingSpinner />
+      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Cargando...</p>
+    </div>
+  </div>
+)
+
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <div className="min-h-screen bg-background transition-colors duration-300">
-            <Suspense fallback={<LoadingSpinner />}>
+          <div className="min-h-screen bg-background">
+            <Suspense fallback={<OptimizedLoadingFallback />}>
               <Routes>
-                {/* Ruta de login */}
+                {/* ✅ Ruta de login - Primera carga (más ligera) */}
                 <Route path="/login" element={<Login />} />
                 
-                {/* Rutas protegidas */}
+                {/* ✅ Rutas protegidas - Se cargan DESPUÉS del login */}
                 <Route path="/" element={
                   <ProtectedRoute>
-                    <Layout />
+                    <Suspense fallback={<OptimizedLoadingFallback />}>
+                      <Layout />
+                    </Suspense>
                   </ProtectedRoute>
                 }>
-                  <Route index element={<Home />} />
-                  <Route path="analizar" element={<Analizar />} />
-                  <Route path="faq" element={<FAQ />} />
-                  <Route path="contacto" element={<Contacto />} />
+                  <Route index element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Home />
+                    </Suspense>
+                  } />
+                  <Route path="analizar" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Analizar />
+                    </Suspense>
+                  } />
+                  <Route path="faq" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <FAQ />
+                    </Suspense>
+                  } />
+                  <Route path="contacto" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Contacto />
+                    </Suspense>
+                  } />
                 </Route>
                 
-                {/* Ruta catch-all - redirigir a home */}
+                {/* Ruta catch-all */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>

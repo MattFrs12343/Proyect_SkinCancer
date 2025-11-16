@@ -5,26 +5,51 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0', // Exponer en todas las interfaces de red
+    host: '0.0.0.0',
     port: 3000,
     open: true,
-    strictPort: false, // Permitir usar otro puerto si 3000 está ocupado
+    strictPort: false,
+    // Permitir todos los hosts (Cloudflare, localhost, IPs locales)
     allowedHosts: [
-      '.trycloudflare.com', // Permitir todos los subdominios de Cloudflare
-      'ringtones-incomplete-delays-reseller.trycloudflare.com', // Tu túnel específico
+      '.trycloudflare.com',
       'localhost',
-      '192.168.0.16'
-    ]
+      '127.0.0.1'
+    ],
+    // Configuración de HMR para Cloudflare
+    hmr: {
+      clientPort: 3000
+    },
+    // ✅ PROXY para evitar CORS en desarrollo local
+    proxy: {
+      // Redirigir todas las peticiones a /api, /health, /predict al backend
+      '/api': {
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/health': {
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/predict': {
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
+    target: 'es2015',
+    minify: 'esbuild',
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'components': [],
-          'pages': []
+          'react-vendor': ['react', 'react-dom', 'react-router-dom']
         }
       }
     }

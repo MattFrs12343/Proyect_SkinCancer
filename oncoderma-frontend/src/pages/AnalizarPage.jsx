@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { apiService } from '../services/apiService'
@@ -9,6 +9,7 @@ const AnalizarPage = () => {
   const { token } = useAuth()
   const { theme } = useTheme()
   const fileInputRef = useRef(null)
+  const resultsRef = useRef(null)
 
   const [formData, setFormData] = useState({
     file: null,
@@ -22,6 +23,24 @@ const AnalizarPage = () => {
   const [results, setResults] = useState(null)
   const [error, setError] = useState('')
   const [imageMetadata, setImageMetadata] = useState(null)
+
+  // Scroll automático a los resultados cuando estén disponibles
+  useEffect(() => {
+    if (results && resultsRef.current) {
+      // Pequeño delay para asegurar que el DOM se haya actualizado
+      setTimeout(() => {
+        // Obtener la posición del elemento
+        const elementPosition = resultsRef.current.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - 80 // 80px de offset para mostrar el título completo
+        
+        // Hacer scroll suave a la posición calculada
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }, 100)
+    }
+  }, [results])
 
   // Opciones para los selects
   const sexOptions = [
@@ -349,7 +368,7 @@ const AnalizarPage = () => {
             )}
 
             {results && !loading && (
-              <div className={`rounded-xl p-8 ${theme === 'dark' ? 'bg-[#1a2332]' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div ref={resultsRef} className={`rounded-xl p-8 ${theme === 'dark' ? 'bg-[#1a2332]' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                 <h2 className={`text-2xl font-semibold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   📊 Resultados del Análisis
                 </h2>
