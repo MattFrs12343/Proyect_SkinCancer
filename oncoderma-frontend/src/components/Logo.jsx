@@ -9,7 +9,7 @@ const Logo = ({ className = 'h-10 w-auto', showText = true, textClassName = 'tex
       <img 
         src={theme === 'light' ? '/img/OncoDerma-Logo.png' : '/img/DarckLogoOscuro.png'} 
         alt="OncoDerma" 
-        className={className}
+        className={`${className} logo-mobile-navbar`}
       />
       {showText && (
         <span className={`${textClassName} font-bold text-primary`}>

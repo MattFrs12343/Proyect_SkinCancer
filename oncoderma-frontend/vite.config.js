@@ -23,18 +23,18 @@ export default defineConfig({
     proxy: {
       // Redirigir todas las peticiones a /api, /health, /predict al backend
       '/api': {
-        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
       '/health': {
-        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
         secure: false
       },
       '/predict': {
-        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
         secure: false
       }

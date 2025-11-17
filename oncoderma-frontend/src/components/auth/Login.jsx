@@ -229,7 +229,7 @@ const Login = () => {
           <div className="w-full max-w-md lg:mr-auto">
             {/* Logo y título móvil */}
             <div className="lg:hidden text-center mb-6">
-              <AdaptiveLogo className="h-12 w-auto mx-auto mb-3" alt="OncoDerma" />
+              <AdaptiveLogo className="h-12 w-auto mx-auto mb-3 logo-mobile-login" alt="OncoDerma" />
               <h2 className="text-xl font-bold text-primary">Iniciar Sesión</h2>
             </div>
 

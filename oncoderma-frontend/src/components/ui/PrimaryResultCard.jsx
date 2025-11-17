@@ -163,10 +163,22 @@ const PrimaryResultCard = memo(({ analysisResult, onNewAnalysis }) => {
             >
               {/* Posición */}
               <div className="flex items-center justify-between mb-4">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                  index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-purple-500' : 'bg-green-500'
-                } text-white font-bold text-lg flex-shrink-0`}>
-                  {index + 1}
+                <div 
+                  className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                    index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-purple-500' : 'bg-green-500'
+                  } text-white font-bold text-lg flex-shrink-0 position-circle-mobile`}
+                  style={{ 
+                    lineHeight: '2.5rem',
+                    padding: 0
+                  }}
+                >
+                  <span style={{ 
+                    display: 'block',
+                    lineHeight: 1,
+                    transform: 'translateY(0)'
+                  }}>
+                    {index + 1}
+                  </span>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
                   pred.isCancer === true 

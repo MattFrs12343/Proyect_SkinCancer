@@ -385,7 +385,7 @@ const AnalizarPage = () => {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-3">
-                          <span className={`text-2xl font-bold ${theme === 'dark' ? 'text-cyan-500' : 'text-gray-900'}`}>
+                          <span className={`text-2xl font-bold ${theme === 'dark' ? 'text-cyan-500' : 'text-gray-900'} position-number-mobile`}>
                             #{index + 1}
                           </span>
                           <div>

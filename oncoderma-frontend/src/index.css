@@ -3880,3 +3880,144 @@ body {
               border-color var(--theme-transition-duration) var(--theme-transition-timing),
               color var(--theme-transition-duration) var(--theme-transition-timing);
 }
+
+
+/* ========================================
+   CORRECCIÓN DE CENTRADO DE CÍRCULOS NUMERADOS EN MÓVIL
+   Solo para página de Analizar (Top 3) - No afecta escritorio
+   ======================================== */
+
+/* Centrado perfecto para círculos de posición en PrimaryResultCard (Top 3) */
+@media (max-width: 768px) {
+  .position-circle-mobile {
+    /* Flexbox para centrado perfecto horizontal y vertical */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    /* Eliminar padding/margin que descuadre */
+    padding: 0 !important;
+    margin: 0 !important;
+    
+    /* Asegurar que el contenido interno esté centrado */
+    text-align: center !important;
+  }
+  
+  .position-circle-mobile > span {
+    /* El span interno debe estar perfectamente centrado */
+    display: block !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Centrado para números de posición en AnalizarPage */
+  .position-number-mobile {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+  }
+}
+
+/* Optimización adicional para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .position-circle-mobile {
+    /* Mantener tamaño consistente */
+    min-width: 2.5rem !important;
+    min-height: 2.5rem !important;
+  }
+  
+  .position-number-mobile {
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+  }
+}
+
+
+/* ========================================
+   AJUSTE DE TAMAÑO DE LOGOS EN MÓVIL
+   Solo para pantallas pequeñas - No afecta escritorio
+   ======================================== */
+
+/* Logo más grande en Login (móvil) - NO MODIFICAR */
+@media (max-width: 768px) {
+  .logo-mobile-login {
+    /* Aumentar tamaño del logo en Login móvil */
+    height: 5rem !important; /* 80px - antes era 3rem (48px) */
+    width: auto !important;
+    max-width: 100% !important;
+    
+    /* Mantener proporción y evitar distorsión */
+    object-fit: contain !important;
+    
+    /* Centrado perfecto */
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Logo más grande en Navbar (móvil) - AGRANDADO */
+  .logo-mobile-navbar {
+    /* Aumentar significativamente el tamaño del logo en Navbar móvil */
+    height: 4rem !important; /* 64px - antes era 2.5rem (40px) */
+    width: auto !important;
+    max-width: none !important;
+    
+    /* Mantener proporción y evitar distorsión */
+    object-fit: contain !important;
+    
+    /* Asegurar que no se recorte */
+    display: block !important;
+  }
+  
+  /* Aumentar altura del Navbar en móvil para acomodar el logo más grande */
+  nav.bg-white {
+    min-height: 4.5rem !important; /* 72px - antes era 4rem (64px) */
+  }
+  
+  nav.bg-white > div > div {
+    min-height: 4.5rem !important; /* 72px */
+    height: auto !important;
+  }
+}
+
+/* Optimización para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .logo-mobile-login {
+    /* Ajustar ligeramente en pantallas muy pequeñas */
+    height: 4.5rem !important; /* 72px */
+  }
+  
+  .logo-mobile-navbar {
+    /* Logo grande también en pantallas muy pequeñas */
+    height: 3.5rem !important; /* 56px */
+  }
+  
+  /* Ajustar altura del Navbar en pantallas muy pequeñas */
+  nav.bg-white {
+    min-height: 4rem !important; /* 64px */
+  }
+  
+  nav.bg-white > div > div {
+    min-height: 4rem !important; /* 64px */
+  }
+}
+
+/* Asegurar que el contenedor del logo también se ajuste */
+@media (max-width: 768px) {
+  .logo-mobile-login img,
+  .logo-mobile-navbar img {
+    /* Asegurar que la imagen interna respete el tamaño */
+    height: 100% !important;
+    width: auto !important;
+    object-fit: contain !important;
+  }
+  
+  /* Asegurar que el contenedor flex del logo en Navbar se ajuste */
+  .logo-mobile-navbar + span {
+    /* Ajustar el texto del logo si existe */
+    font-size: 1.125rem !important; /* 18px */
+    line-height: 1.2 !important;
+  }
+}
